@@ -27,4 +27,5 @@ jobs:
           echo "$HOME/src/python" >> $GITHUB_PATH
       - name: Unittest
         run: |
+          echo "$GITHUB_PATH"
           pytest
