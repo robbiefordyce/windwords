@@ -1,0 +1,29 @@
+# .github/workflows/ci.yml
+name: CI
+
+on: push
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+
+    steps:
+      # To use this repository's private action,
+      # you must check out the repository
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8 #install the python needed
+      - name: Install Dependencies
+        run: |
+          python -m pip install -r requirements.txt --upgrade pip
+          pip install pytest
+      - name: Set PYTHONPATH
+        run: |
+          echo "${GITHUB_REPOSITORY#*/}"
+          echo "::set-env name=PYTHONPATH::home/runner/work/${GITHUB_REPOSITORY#*/}/src/python"
+      - name: Unittest
+        run: |
+          pytest
