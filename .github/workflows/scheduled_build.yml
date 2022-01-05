@@ -3,12 +3,13 @@ name: Test call windwords repository function
 
 on:
   schedule:
-    # Runs "at minute 2 past every hour" (see https://crontab.guru)
-    - cron: '2 * * * *'
+    # Runs "every five minutes" (see https://crontab.guru)
+    - cron: '*/5 * * * *'
+
 jobs:
-  job1:
-    name: Test call a windwords function
+  build:
     runs-on: ubuntu-latest
+
     steps:
       # To use this repository's private action,
       # you must check out the repository
@@ -19,9 +20,10 @@ jobs:
         with:
           python-version: 3.8 #install the python needed
       - name: Run
+        run: |
+          python ./src/python/windwords/test_github_action.py
         env:
           MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
           MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
-        run: |
-          python src/python/windwords/test_github_action.py
+        
