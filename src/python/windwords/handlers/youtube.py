@@ -1,9 +1,9 @@
 from pytube import Channel, YouTube
 from urllib.parse import urlparse
-from scriptures.texts.kjv1611 import KingJames1611
 
 from windwords import constants
 from windwords.youtube import download_captions
+from windwords.scriptures import Bible
 from windwords.handlers.base import DocumentHandler
 
 
@@ -179,9 +179,9 @@ class YoutubeVideoHandler(DocumentHandler):
             List[scriptures.ScriptureReference]: Collection of extracted
                 scripture references. 
         """
-        kjv = KingJames1611()
+        bible = Bible()
         references = [
-            kjv.reference_to_string(*ref) for ref in kjv.extract(text)
+            bible.reference_to_string(*ref) for ref in bible.extract(text)
         ]
         if not allow_duplicates:
             references = list(set(references))
