@@ -56,7 +56,7 @@ def get_collection(name):
         pymongo.Collection: The MongoDB collection instance.
     """
     client = get_client()
-    database = client.get_database(constants.Database.DEFAULT_NAME)
+    database = client.get_database(constants.Database.DEFAULT_NAME.value)
     return database.get_collection(name)
 
 
@@ -118,6 +118,56 @@ def find_all(collection):
     return find_documents(collection, {})
 
 
+def find_ids(collection, query, limit=None, sort=None):
+    """ Returns the documents that match the query in the specified collection.
+
+    Args:
+        collection (str): The collection name to query.
+        query (dict): The document criteria to match.
+        limit (int, optional): If specified, limits the results to this number.
+        sort (list(tuple(str, int)), optional): If specified, sorts the results
+            by mutliple fields. Each field is specified by pairs of the field
+            name (str) and the direction (ASCENDING=1, DESCENDING=-1).
+    Yields:
+        (bson.ObjectId): The database object identifier, or None.
+    """
+    for document in find_documents(collection, query, limit=limit, sort=sort):
+        yield document.get("_id", None)
+
+
+def find_id(collection, query):
+    """ Returns the first document objectId that matches the query in the
+        specified collection.
+
+    Args:
+        collection (str): The collection name to query.
+        query (dict): The document criteria to match.
+    Returns:
+        (bson.ObjectId): The database object identifier, or None.
+    """
+    document = find_document(collection, query) or {}
+    return document.get("_id", None)
+
+
+def find_id_in_database(objectID):
+    """ Returns the document that matches the specified objectID across all
+        database collections.
+        (If a collection name is known, it is recommended to use 
+        `find_document_by_id` for performance.)
+
+    Args:
+        objectID (bson.ObjectId): The database object identifier.
+    Returns:
+        Dict: The matched document, or None.
+    """
+    collections = [c.value for c in constants.Collection]
+    for collection in collections:
+        document = find_document_by_id(collection, objectID)
+        if document:
+            return document
+    return None
+
+
 def count_documents(collection, query):
     """ Returns the total number of documents, within the specified collection,
         that match the provided criteria.
@@ -149,10 +199,8 @@ def insert_documents(collection, documents):
         collection (str): The collection name to insert into.
         documents (dict): The documents to insert.
     Returns:
-        List[str]: The inserted document object ids.
+        List[bson.ObjectId]: The inserted document object ids.
     """
-    if isinstance(documents, dict):
-        documents = [documents]
     collection = get_collection(collection)
     result = collection.insert_many(documents)
     return result.inserted_ids
