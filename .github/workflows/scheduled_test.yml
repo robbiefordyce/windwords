@@ -1,0 +1,27 @@
+# .github/workflows/scheduled_test.yml
+name: Test call windwords repository function
+
+on:
+  schedule:
+    # Runs "at minute 0 past every hour" (see https://crontab.guru)
+    - cron: '0 * * * *'
+jobs:
+  job1:
+    name: Test call a windwords function
+    runs-on: ubuntu-latest
+    steps:
+      # To use this repository's private action,
+      # you must check out the repository
+      - name: Checkout
+          uses: actions/checkout@v2
+      - name: Install Python
+            uses: actions/setup-python@v2
+            with:
+              python-version: 3.8 #install the python needed
+      - name: Run
+          env:
+            MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
+            MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+            MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
+          run: |
+            python src/python/windwords/test_github_action.py
