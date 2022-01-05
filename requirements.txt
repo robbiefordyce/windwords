@@ -1,0 +1,9 @@
+cachetools==5.0.0
+certifi==2021.10.8
+dnspython==2.1.0
+pymongo==4.0.1
+pyparsing==3.0.6
+pytest==6.2.5
+python-scriptures==3.0.0
+pytube==11.0.2
+srt==3.5.0
