@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 
 from windwords import constants
 from windwords.youtube import download_captions
-from windwords.scriptures import Bible
+from windwords.scripture import Bible
 from windwords.handlers.base import DocumentHandler
 
 
