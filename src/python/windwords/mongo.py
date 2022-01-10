@@ -3,6 +3,7 @@ import dns
 import bson
 import certifi
 import pymongo
+from datetime import datetime
 from urllib.parse import quote_plus
 
 from windwords import constants
@@ -202,6 +203,16 @@ def insert_documents(collection, documents):
     Returns:
         List[bson.ObjectId]: The inserted document object ids.
     """
+    # Append insertion metadata to each document
+    for document in documents:
+        document.update({
+            "metadata": {
+                "inserted_date": datetime.now(),
+                "inserted_username": os.getenv("MONGO_USERNAME"),
+                "inserted_version": "0.0.0",
+            }
+        })
+    # Insert into database collection
     collection = get_collection(collection)
     result = collection.insert_many(documents)
     return result.inserted_ids
@@ -221,9 +232,24 @@ def update_document(collection, query, modification):
         Dict: The modified document, or None.
     """
     collection = get_collection(collection)
-    return collection.find_one_and_update(
-        query, modification, return_document=pymongo.ReturnDocument.AFTER
+    document = collection.find_one_and_update(
+        query,
+        {"$set": modification},
+        return_document=pymongo.ReturnDocument.AFTER,
     )
+    if document:
+        # Append modification metadata to document
+        metadata = document.get("metadata", {})
+        metadata.update({
+            "modified_date": datetime.now(),
+            "modified_username": os.getenv("MONGO_USERNAME"),
+            "modified_version": "0.0.0",
+        })
+        collection.update_one(
+            {"_id": document.get("_id")},
+            {"$set": {"metadata": metadata}},
+        )
+    return document
 
 
 def update_document_by_id(collection, objectID, modification):

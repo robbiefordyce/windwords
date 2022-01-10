@@ -1,6 +1,4 @@
-import os
 from abc import ABC, abstractmethod
-from datetime import datetime
 
 from windwords import mongo
 
@@ -55,8 +53,6 @@ class DocumentHandler(ABC):
         # Construct the document
         document = self.primary_data()
         document.update(self.secondary_data())
-        # Add metadata
-        document.update(self._build_document_metadata())
         # Insert into the database
         return mongo.insert_documents(self.collection(), [document])[0]
 
@@ -104,17 +100,3 @@ class DocumentHandler(ABC):
             (str): The collection name.
         """
         pass
-
-    @classmethod
-    def _build_document_metadata(cls):
-        """ Returns new document metadata.
-
-        Returns:
-            dict: The document metadata.
-        """
-        return {
-            "metadata": {
-                "inserted_date": datetime.now(),
-                "inserted_username": os.getenv("MONGO_USERNAME"),
-            }
-        }
