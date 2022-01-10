@@ -1,13 +1,10 @@
-import nltk
-from nltk.corpus import stopwords
+import json
+from cachetools import cached
+
+from windwords.constants import WINDWORDS_RESOURCES
 
 
-try:
-    nltk.data.find('corpora/stopwords')
-except LookupError:
-    nltk.download('stopwords')
-
-
+@cached(cache={})
 def get_stopwords():
     """ Returns english stopwords defined in NLTK.
         ("stopwords" are filler words, such as "in", "and" and "because"...)
@@ -15,5 +12,6 @@ def get_stopwords():
     Returns:
         List[str]: A collection of stopwords.
     """
-    return sorted(stopwords.words("english"))
-    
+    path = WINDWORDS_RESOURCES.joinpath("stopwords.json")
+    with open(path, "r") as infile:
+        return json.load(infile)
