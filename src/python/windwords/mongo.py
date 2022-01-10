@@ -1,8 +1,9 @@
 import os
 import dns
+import bson
 import certifi
+import pymongo
 from urllib.parse import quote_plus
-from pymongo import MongoClient
 
 from windwords import constants
 
@@ -38,7 +39,7 @@ def connect_to_mongo_client(username=None, password=None, cluster=None):
     username = username or os.getenv("MONGO_USERNAME")
     password = password or os.getenv("MONGO_PASSWORD")
     cluster = cluster or os.getenv("MONGO_CLUSTER")
-    return MongoClient(
+    return pymongo.MongoClient(
         (
             f"mongodb+srv://{quote_plus(username)}:{quote_plus(password)}"
             f"@{cluster}.mongodb.net"
@@ -104,7 +105,7 @@ def find_document_by_id(collection, objectID):
     Returns:
         Dict: The matched document, or None.
     """
-    return find_one_document(collection, {"_id", objectID})
+    return find_document(collection, {"_id": bson.ObjectId(objectID)})
 
 
 def find_all(collection):
@@ -204,3 +205,40 @@ def insert_documents(collection, documents):
     collection = get_collection(collection)
     result = collection.insert_many(documents)
     return result.inserted_ids
+
+
+def update_document(collection, query, modification):
+    """ Updates the matched document with the specified modifications.
+
+        For a list of modification parameters, please refer here:
+        https://docs.mongodb.com/manual/reference/operator/update/#std-label-update-operators
+
+    Args:
+        collection (str): The collection name to update within.
+        query (dict): The document criteria to match.
+        modification (dict): The modifications to apply.
+    Returns:
+        Dict: The modified document, or None.
+    """
+    collection = get_collection(collection)
+    return collection.find_one_and_update(
+        query, modification, return_document=pymongo.ReturnDocument.AFTER
+    )
+
+
+def update_document_by_id(collection, objectID, modification):
+    """ Updates the specified document with the provided modifications.
+
+        For a list of modification parameters, please refer here:
+        https://docs.mongodb.com/manual/reference/operator/update/#std-label-update-operators
+
+    Args:
+        collection (str): The collection name to update within.
+        objectID (bson.ObjectId): The database object identifier.
+        modification (dict): The modifications to apply.
+    Returns:
+        Dict: The modified document, or None.
+    """
+    return update_document(
+        collection, {"_id": bson.ObjectId(objectID)}, modification
+    )
