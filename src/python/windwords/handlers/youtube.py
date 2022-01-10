@@ -22,7 +22,7 @@ class YoutubeChannelHandler(DocumentHandler):
             "channel_id": channel.channel_id,
             "channel_url": channel.channel_url,
             "host": urlparse(channel.channel_url).hostname,
-            "name": channel.name, 
+            "name": channel.channel_name, 
         }
 
     @classmethod
