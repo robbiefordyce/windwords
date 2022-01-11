@@ -21,7 +21,11 @@ jobs:
           python -m pip install -r requirements.txt --upgrade pip
           pip install pytest
           echo ${GITHUB_WORKSPACE}
-          echo ${HOME}
+      - name: Create env file
+        run: |
+          touch .env
+          echo PYTHONPATH="${GITHUB_WORKSPACE}/src/python" >> .env
+          cat .env
       - name: Unittest
         run: |
           pytest
