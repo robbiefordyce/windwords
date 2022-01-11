@@ -22,7 +22,7 @@ jobs:
           pip install pytest
       - name: Add to Path
         run: |
-          echo "${HOME}/src/python" >> $PYTHONPATH
+          PATH=$PATH:${HOME}/src/python
       - name: Unittest
         run: |
           pytest
