@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: 3.8 #install the python needed
       - name: Run
-        run: python ./bin/populate_sermons.py
+        run: python ./bin/populate_sermons
         env:
           PYTHONPATH: ${{ github.workspace }}/src/python
           MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
