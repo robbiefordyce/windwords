@@ -1,3 +1,4 @@
+from datetime import datetime
 from pytube import Channel, YouTube
 
 
@@ -41,7 +42,9 @@ def get_recent_videos_from_channel(url, delta):
         (pytube.Youtube): Youtube video instances.
     """
     now = datetime.now()
-    for video in get_videos_from_channel_within_timeframe(url, now-delta, now):
+    for video in get_videos_from_channel(url):
+        if video.publish_date < now-delta:
+            break
         yield video
 
 
