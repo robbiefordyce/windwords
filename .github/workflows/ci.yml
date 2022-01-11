@@ -26,7 +26,7 @@ jobs:
           echo ${PYTHONPATH}
           pytest
         env:
-          PYTHONPATH: ${{env.API_KEY}}+"/src/python"
+          PYTHONPATH: ${{ env.GITHUB_WORKSPACE }}/src/python
           MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
           MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
