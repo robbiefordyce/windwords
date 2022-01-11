@@ -58,7 +58,7 @@ def get_collection(name):
         pymongo.Collection: The MongoDB collection instance.
     """
     client = get_client()
-    database = client.get_database(constants.Database.DEFAULT_NAME.value)
+    database = client.get_database(constants.DATABASE_NAME)
     return database.get_collection(name)
 
 
