@@ -23,6 +23,7 @@ jobs:
       - name: Add to Path
         run: |
           echo "${HOME}/src/python" >> $GITHUB_PATH
+          echo "${GITHUB_PATH}"
       - name: Unittest
         run: |
           pytest
