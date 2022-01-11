@@ -19,6 +19,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8 #install the python needed
+      - name: Install Dependencies
+        run: python -m pip install -r requirements.txt --upgrade pip
       - name: Run
         run: python ./bin/populate_sermons
         env:
