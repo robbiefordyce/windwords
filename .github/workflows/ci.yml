@@ -22,7 +22,7 @@ jobs:
           pip install pytest
       - name: Add to Path
         run: |
-          PATH=$PATH:${HOME}/src/python
+          echo "::set-env name=PYTHONPATH::$GITHUB_WORKSPACE/src/python"
       - name: Unittest
         run: |
           pytest
