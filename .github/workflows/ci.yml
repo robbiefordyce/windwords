@@ -20,13 +20,11 @@ jobs:
         run: |
           python -m pip install -r requirements.txt --upgrade pip
           pip install pytest
-      - name: Add to Path
-        run: |
-          PATH=$PATH:${GITHUB_WORKSPACE}/src/python
       - name: Unittest
         run: |
           pytest
         env:
+          PYTHONPATH: "${GITHUB_WORKSPACE}/src/python"
           MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
           MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
