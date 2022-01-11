@@ -22,8 +22,7 @@ jobs:
           pip install pytest
       - name: Add to Path
         run: |
-          echo "${HOME}/src/python" >> $GITHUB_PATH
-          echo "${GITHUB_PATH}"
+          echo "${HOME}/src/python" >> $PYTHONPATH
       - name: Unittest
         run: |
           pytest
