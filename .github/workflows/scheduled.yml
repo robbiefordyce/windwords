@@ -7,7 +7,7 @@ on:
     - cron: '0 22 * * TUE'
 
 jobs:
-  build:
+  populate:
     runs-on: ubuntu-latest
 
     steps:
