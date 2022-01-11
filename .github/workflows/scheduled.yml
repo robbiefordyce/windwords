@@ -1,10 +1,10 @@
-# .github/workflows/scheduled_test.yml
-name: Test call windwords repository function
+# .github/workflows/scheduled.yml
+name: Populate Sermons
 
 on:
   schedule:
-    # Runs "every five minutes" (see https://crontab.guru)
-    - cron: '*/5 * * * *'
+    # Runs "At 22:00 on Tuesday" (see https://crontab.guru)
+    - cron: '0 22 * * TUE'
 
 jobs:
   build:
@@ -20,9 +20,9 @@ jobs:
         with:
           python-version: 3.8 #install the python needed
       - name: Run
-        run: |
-          python ./src/python/windwords/test_github_action.py
+        run: python ./bin/populate_sermons.py
         env:
+          PYTHONPATH: ${{ github.workspace }}/src/python
           MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
           MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
