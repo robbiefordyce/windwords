@@ -26,6 +26,10 @@ def mark_8_34():
     return "Mark 8:34"
 
 @pytest.fixture
+def mark_8_to_10():
+    return "Mark 8-10"
+
+@pytest.fixture
 def second_timothy_3_16():
     return "II Timothy 3:16"
 
@@ -65,9 +69,6 @@ def test_multiword_reference_camelcase(rev_2_20):
 def test_apocryphal_multiword_reference_camelcase(wis_1_15):
     assert wis_1_15 in extract("THe wIsDOm oF SoLOmoN 1:15")
 
-def test_reference_chapter(mark_8):
-    assert mark_8 in extract("mark 8")
-
 def test_reference_border_spaces(mark_8_34):
     assert mark_8_34 in extract(" mark 8:34  ")
 
@@ -89,9 +90,6 @@ def test_reference_leading_digit_as_ordinal_word(second_timothy_3_16):
 def test_reference_leading_digit_as_ordinal_number(second_timothy_3_16):
     assert second_timothy_3_16 in extract("2nd timothy 3:16")
 
-# def test_reference_lowercase_no_colon(mark_8_34):
-#     assert mark_8_34 in extract("mark 8 34")
-
 def test_reference_leading_digit_as_roman_numeral(second_timothy_3_16):
     assert second_timothy_3_16 in extract("II timothy 3:16")
 
@@ -110,8 +108,15 @@ def test_reference_lowercase_no_colon(mark_8_34):
 def test_reference_filler_words(mark_8_34):
     assert mark_8_34 in extract("go to mark in chapter 8 and verse 34")
 
-# def test_reference_lowercase_as_words(mark_8_34):
-#     assert mark_8_34 in extract("mark eight thirty four")
+def test_reference_lowercase_as_words(mark_8_34):
+    assert mark_8_34 in extract("mark eight thirty four")
+
+def test_reference_filler_words_as_words(mark_8_34):
+    assert mark_8_34 in extract("mark chapter eight verse thirty four")
+
+# TODO
+# def test_reference_filler_words_as_words_chapter_first(mark_8_34):
+#     assert mark_8_34 in extract("the eighth chapter of mark verse thirty four")
 
 def test_reference_multi_verse(exodus_2_3to5):
     assert exodus_2_3to5 in extract("exodus 2:3-5")
@@ -125,22 +130,29 @@ def test_reference_multi_verse_spaces(exodus_2_3to5):
 def test_reference_multi_verse_filler_words(exodus_2_3to5):
     assert exodus_2_3to5 in extract("exodus chapter 2 verses 3 through to 5")
 
+def test_reference_multi_verse_filler_verse_words(exodus_2_3to5):
+    assert exodus_2_3to5 in extract("exodus chapter 2 verse 3 to verse 5")
+
+def test_reference_chapter(mark_8):
+    assert mark_8 in extract("mark 8")
+
+def test_reference_chapter_as_word(mark_8):
+    assert mark_8 in extract("mark eight")
+
+def test_reference_multi_chapter_filler_chapter_words(mark_8_to_10):
+    assert mark_8_to_10 in extract("mark chapter 8 through to chapter 10")
+
 def test_reference_multi_chapter(john_1_2to_3_4):
     assert john_1_2to_3_4 in extract("john 1:2-3:4")
 
 def test_reference_multi_chapter_spaced(john_1_2to_3_4):
     assert john_1_2to_3_4 in extract("john 1:2 3:4")
 
-def test_reference_multi_chapter_filler_words(john_1_2to_3_4):
-    assert john_1_2to_3_4 in extract(
-        "john chapter 1 verse 2 through to chapter 3 verse 4"
-    )
-
-# def test_reference_filler_words_as_words(mark_8_34):
-#     assert mark_8_34 in extract("mark chapter eight verse thirty four")
-
-# def test_reference_chapter_as_word(mark_8):
-#     assert mark_8 in extract("mark eight")
+# TODO
+# def test_reference_multi_chapter_filler_words(john_1_2to_3_4):
+#     assert john_1_2to_3_4 in extract(
+#         "john chapter 1 verse 2 through to chapter 3 verse 4"
+#     )
 
 def test_reference_multiple(rev_2_20, exodus_2_3to5):
     verses = extract((
@@ -158,3 +170,15 @@ def test_reference_alternate_book_name(sol_1_2):
     assert sol_1_2 in extract("Song of Songs 1:2")
     assert sol_1_2 in extract("Cant of Cant 1:2")
     assert sol_1_2 in extract("Canticle of Canticles 1:2")
+
+"""
+'REAL' EXAMPLES FROM YOUTUBE CAPTIONS
+ - the video url ID is appended (in case we need to backtrack)
+"""
+
+def test_youtube_44yurc16utQ():
+    assert "John 11:32" in extract(
+        "the holy gospel according to saint john beginning at chapter 11"
+        " verse 32"
+    )
+
