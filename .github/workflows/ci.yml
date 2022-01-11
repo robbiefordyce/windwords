@@ -24,6 +24,7 @@ jobs:
         run: |
           pytest
         env:
+          PYTHONPATH: ${{ github.workspace }}/src/python
           MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
           MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
           MONGO_CLUSTER: ${{ secrets.MONGO_CLUSTER }}
