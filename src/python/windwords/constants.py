@@ -24,6 +24,21 @@ class Collection(Enum):
     SERMONS = "sermons"
 
 
+class Denomination(Enum):
+    ADVENTIST = "Adventist"
+    ANGLICAN = "Anglican"
+    BAPTIST = "Baptist"
+    BRETHREN = "Brethren"
+    CATHOLIC = "Catholic"
+    LUTHERAN = "Lutheran"
+    METHODIST = "Methodist"
+    ORTHODOX = "Orthodox"
+    PENTECOSTAL = "Pentecostal"
+    PROTESTANT = "Protestant"
+    PRESBYTERIAN = "Presbyterian"
+    REFORMED = "Reformed"
+
+
 class MediaFormat(Enum):
     AUDIO = "audio"
     VIDEO = "video"
