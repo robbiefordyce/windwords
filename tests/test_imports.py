@@ -5,6 +5,7 @@
 def test_import_windwords():
     from windwords import api
     from windwords import constants
+    from windwords import google
     from windwords import handlers
     from windwords import logging
     from windwords import mongo
