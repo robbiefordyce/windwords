@@ -24,13 +24,19 @@ class DocumentHandler(ABC):
         Returns:
             bson.ObjectId: The object Id of the database document, or None.
         """
-        return mongo.find_id(self.collection(), self.primary_data())
+        return mongo.find_id(
+            self.collection(),
+            self.prune_data(self.primary_data())
+        )
 
     def find(self):
         """ Returns a document in the database that matches the internal object
             handled by this handler.
         """
-        return mongo.find_document(self.collection(), self.primary_data())
+        return mongo.find_document(
+            self.collection(),
+            self.prune_data(self.primary_data())
+        )
 
     def exists_in_database(self):
         """ Returns whether the associated document exists in the database.
@@ -51,8 +57,8 @@ class DocumentHandler(ABC):
         # Ensure we are not about to add an entry that already exists!
         assert not self.exists_in_database(), "Document already exists in the database!"
         # Construct the document
-        document = self.primary_data()
-        document.update(self.secondary_data())
+        document = self.prune_data(self.primary_data())
+        document.update(self.prune_data(self.secondary_data()))
         # Insert into the database
         return mongo.insert_documents(self.collection(), [document])[0]
 
@@ -100,3 +106,28 @@ class DocumentHandler(ABC):
             (str): The collection name.
         """
         pass
+
+    @staticmethod
+    def prune_data(data, prune=None, recursive=True):
+        """ Returns a copy of the input dictionary with empty values removed.
+
+        Args:
+            data (dict): An input dictionary
+            prune (Optional[List[obj]]): A list of values to remove.
+                Defaults to None types, empty dicts/lists and the empty string.
+            recursive (bool): If true will recursively remove empty values from
+                sub-dictionaries. Defaults to True. 
+        Returns:
+            dict: A copy of the dictionary with the empty values pruned.
+        """
+        data = dict(data) # ensure we create a clean copy
+        if recursive:
+            for key, value in data.items():
+                if isinstance(value, dict):
+                    data.update({
+                        key: DocumentHandler.prune_data(
+                            value, prune=prune, recursive=recursive
+                        )
+                    })
+        prune = prune or (None, "", [], {})
+        return {k:v for (k,v) in data.items() if v not in prune}
