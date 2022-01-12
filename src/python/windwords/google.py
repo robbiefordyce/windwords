@@ -53,7 +53,7 @@ def get_places_by_type(
         query=None,
         next_page_token=None,
     ):
-    """ Returns a Google Place from the given google place id.
+    """ Returns Google Places from the given Google place type.
 
     Args:
         place_type (str): Restricts the results to places matching the
@@ -84,7 +84,8 @@ def get_places_by_type(
 def get_all_places_by_type(
         place_type, location=None, radius=None, region=None, query=None,
     ):
-    """ Returns a Google Place from the given google place id.
+    """ Returns the maximum number of Google Places from the given Google
+        place type.
 
     Args:
         place_type (str): Restricts the results to places matching the
