@@ -130,6 +130,31 @@ class ChurchHandler(DocumentHandler):
         return constants.Collection.CHURCHES.value
 
     @classmethod
+    def get_link_schema(cls):
+        """ Returns a link schema that describes how this handler's document
+            should link to the documents of other handlers.
+            Link schema is a dictionary: {
+                `handlerClassName`: {
+                    "field": `str`,
+                    "type": `windwords.constants.LinkType`
+                }
+            } 
+
+        Returns:
+            dict: The link schema for this handler.
+        """
+        return {
+            "YoutubeChannelHandler": {
+                "field": "channel",
+                "type": constants.LinkType.TO_ONE.value,
+            },
+            "YoutubeVideoHandler": {
+                "field": "sermons",
+                "type": constants.LinkType.TO_MANY.value,
+            },
+        }
+
+    @classmethod
     def resolve_denomination_from_text(cls, text):
         """ Attempts to extract a Church denomination from given text. 
             For a full list of denominations, refer to:

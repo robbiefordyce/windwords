@@ -47,6 +47,31 @@ class YoutubeChannelHandler(DocumentHandler):
         return constants.Collection.CHANNELS.value
 
     @classmethod
+    def get_link_schema(cls):
+        """ Returns a link schema that describes how this handler's document
+            should link to the documents of other handlers.
+            Link schema is a dictionary: {
+                `handlerClassName`: {
+                    "field": `str`,
+                    "type": `windwords.constants.LinkType`
+                }
+            } 
+
+        Returns:
+            dict: The link schema for this handler.
+        """
+        return {
+            "ChurchHandler": {
+                "field": "churches",
+                "type": constants.LinkType.TO_MANY.value,
+            },
+            "YoutubeVideoHandler": {
+                "field": "sermons",
+                "type": constants.LinkType.TO_MANY.value,
+            },
+        }
+
+    @classmethod
     def from_url(cls, url):
         """ Instantiates a YoutubeChannelHandler from a url.
         
@@ -119,6 +144,31 @@ class YoutubeVideoHandler(DocumentHandler):
             (str): The collection name.
         """
         return constants.Collection.SERMONS.value
+
+    @classmethod
+    def get_link_schema(cls):
+        """ Returns a link schema that describes how this handler's document
+            should link to the documents of other handlers.
+            Link schema is a dictionary: {
+                `handlerClassName`: {
+                    "field": `str`,
+                    "type": `windwords.constants.LinkType`
+                }
+            } 
+
+        Returns:
+            dict: The link schema for this handler.
+        """
+        return {
+            "ChurchHandler": {
+                "field": "church",
+                "type": constants.LinkType.TO_ONE.value,
+            },
+            "YoutubeChannelHandler": {
+                "field": "channel",
+                "type": constants.LinkType.TO_ONE.value,
+            },
+        }
 
     @classmethod
     def from_url(cls, url):

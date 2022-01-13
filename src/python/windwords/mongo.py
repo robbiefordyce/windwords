@@ -218,7 +218,7 @@ def insert_documents(collection, documents):
     return result.inserted_ids
 
 
-def update_document(collection, query, modification):
+def update_document(collection, query, modification, operator="$set"):
     """ Updates the matched document with the specified modifications.
 
         For a list of modification parameters, please refer here:
@@ -228,13 +228,16 @@ def update_document(collection, query, modification):
         collection (str): The collection name to update within.
         query (dict): The document criteria to match.
         modification (dict): The modifications to apply.
+        operator (str): The MongoDB modification operator to apply. Defaults to
+            "$set". For a full list of update operators please refer to:
+                https://docs.mongodb.com/manual/reference/operator/update/#update-operators-1
     Returns:
         Dict: The modified document, or None.
     """
     collection = get_collection(collection)
     document = collection.find_one_and_update(
         query,
-        {"$set": modification},
+        {operator: modification},
         return_document=pymongo.ReturnDocument.AFTER,
     )
     if document:
@@ -252,7 +255,7 @@ def update_document(collection, query, modification):
     return document
 
 
-def update_document_by_id(collection, objectID, modification):
+def update_document_by_id(collection, objectID, modification, operator="$set"):
     """ Updates the specified document with the provided modifications.
 
         For a list of modification parameters, please refer here:
@@ -262,9 +265,15 @@ def update_document_by_id(collection, objectID, modification):
         collection (str): The collection name to update within.
         objectID (bson.ObjectId): The database object identifier.
         modification (dict): The modifications to apply.
+        operator (str): The MongoDB modification operator to apply. Defaults to
+            "$set". For a full list of update operators please refer to:
+                https://docs.mongodb.com/manual/reference/operator/update/#update-operators-1
     Returns:
         Dict: The modified document, or None.
     """
     return update_document(
-        collection, {"_id": bson.ObjectId(objectID)}, modification
+        collection,
+        {"_id": bson.ObjectId(objectID)},
+        modification,
+        operator=operator,
     )

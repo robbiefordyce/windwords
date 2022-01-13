@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from windwords import mongo
+from windwords import constants, mongo
 
 
 class DocumentHandler(ABC):
@@ -62,6 +62,73 @@ class DocumentHandler(ABC):
         # Insert into the database
         return mongo.insert_documents(self.collection(), [document])[0]
 
+    def link(self, other):
+        """ Links this handler's document to the other handler's document in
+            the database.
+
+        Args:
+            other (windwords.handlers.DocumentHandler): A document handler
+        Returns:
+            dict: This document with the link applied.
+        Raises:
+            AssertionError: If either of the handlers do not have corresponding
+                documents in the database.
+            ValueError: If the given handler is not linkable to this handler.
+        """
+        # Ensure both handlers exist in the database
+        for handler in (self, other):
+            assert handler.exists_in_database(), (
+                f"Handler {handler} must exist in database. Please insert()"
+            )
+        # Ensure link schema is defined for the `other` handler
+        document = self.find()
+        schema = self.get_link_schema().get(type(other).__name__)
+        if not schema:
+            raise ValueError(
+                f"{type(self)} handlers do not link to {type(other)} handlers"
+            )
+        # Change modification based on link type
+        field = schema.get("field")
+        link_type = schema.get("type")
+        assert bool(field) and link_type is not None, (
+            f"Failed to find a field or type for schema: {schema}"
+        )
+        operator = (
+            "$addToSet"
+            if schema.get("type") == constants.LinkType.TO_MANY.value else
+            "$set"
+        )
+        # Perform the link in the database
+        return mongo.update_document_by_id(
+            self.collection(),
+            str(self.database_object_id()),
+            {f"link.{field}": other.database_object_id()},
+            operator=operator,
+        )
+
+    def is_linked(self, other):
+        """ Returns true if the specified handler is linked to this one in the
+            database.
+
+        Args:
+            other (windwords.handlers.DocumentHandler): A document handler
+        Returns:
+            bool: True if these documents are linked.
+        """
+        # Ensure a schema exists
+        schema = self.get_link_schema().get(type(other).__name__) or {}
+        field = schema.get("field")
+        if not field:
+            return False
+        # Ensure a document exists
+        document = self.find()
+        if not document:
+            return False
+        # Ensure the other document exists
+        object_id = other.database_object_id()
+        links = document.get("link", {}).get(field, [])
+        return object_id and (object_id == links or object_id in links)
+
     @abstractmethod
     def primary_data(self):
         """ Resolves the primary fields and values.
@@ -106,6 +173,22 @@ class DocumentHandler(ABC):
             (str): The collection name.
         """
         pass
+
+    @classmethod
+    def get_link_schema(cls):
+        """ Returns a link schema that describes how this handler's document
+            should link to the documents of other handlers.
+            Link schema is a dictionary: {
+                `handlerClassName`: {
+                    "field": `str`,
+                    "type": `windwords.constants.LinkType`
+                }
+            } 
+
+        Returns:
+            dict: The link schema for this handler.
+        """
+        return {}
 
     @staticmethod
     def prune_data(data, prune=None, recursive=True):

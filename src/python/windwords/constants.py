@@ -39,6 +39,12 @@ class Denomination(Enum):
     REFORMED = "Reformed"
 
 
+class LinkType(Enum):
+    TO_NONE = 0
+    TO_ONE = 1
+    TO_MANY = 2
+
+
 class MediaFormat(Enum):
     AUDIO = "audio"
     VIDEO = "video"
