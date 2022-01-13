@@ -126,8 +126,21 @@ class DocumentHandler(ABC):
             return False
         # Ensure the other document exists
         object_id = other.database_object_id()
-        links = document.get("link", {}).get(field, [])
+        links = self.get_linked_ids(field)
         return object_id and (object_id == links or object_id in links)
+
+    def get_linked_ids(self, field):
+        """ Returns the linked object id(s) for the specified field.
+
+        Args:
+            field (str): A link field name.
+        Returns:
+            List[bson.ObjectId]: A list of linked object ids, under the
+                specified field.
+        """
+        document = self.find()
+        ids = document.get("link", {}).get(field, [])
+        return ids if isinstance(ids, list) else [ids]
 
     @abstractmethod
     def primary_data(self):
@@ -150,6 +163,18 @@ class DocumentHandler(ABC):
             dict: The secondary fields and associated values.
         """
         return {}
+
+    @classmethod
+    @abstractmethod
+    def from_object_id(cls, object_id):
+        """ Instantiates this handler from a database object id. 
+
+        Args:
+            object_id (bson.ObjectId): A database object id.
+        Returns:
+            DocumentHandler: The instantiated handler.
+        """
+        pass
 
     @classmethod
     @abstractmethod
@@ -189,6 +214,18 @@ class DocumentHandler(ABC):
             dict: The link schema for this handler.
         """
         return {}
+
+    @classmethod
+    def get_document_from_object_id(cls, object_id):
+        """ Returns the document that matches the specified objectID in this
+            handler's collection.
+
+        Args:
+            object_id (bson.ObjectId): The database object identifier.
+        Returns:
+            Dict: The matched document, or None.
+        """
+        return mongo.find_document_by_id(cls.collection(), object_id)
 
     @staticmethod
     def prune_data(data, prune=None, recursive=True):

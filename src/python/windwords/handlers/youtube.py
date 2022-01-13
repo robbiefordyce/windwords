@@ -62,8 +62,10 @@ class YoutubeChannelHandler(DocumentHandler):
         """
         return {
             "ChurchHandler": {
-                "field": "churches",
-                "type": constants.LinkType.TO_MANY.value,
+                "field": "church",
+                "type": constants.LinkType.TO_ONE.value,
+                #TODO: Update this TO_MANY later on, for sub-churches within an
+                #organisation 
             },
             "YoutubeVideoHandler": {
                 "field": "sermons",
@@ -72,13 +74,33 @@ class YoutubeChannelHandler(DocumentHandler):
         }
 
     @classmethod
+    def from_object_id(cls, object_id):
+        """ Instantiates a YoutubeChannelHandler from a database object id. 
+
+        Args:
+            object_id (bson.ObjectId): A database object id.
+        Returns:
+            YoutubeChannelHandler: The handler.
+        Raises:
+            ValueError: If the specified object_id does not exist in the
+                database. 
+        """
+        document = cls.get_document_from_object_id(object_id)
+        if not document:
+            raise ValueError(
+                f"Could not find a document with id `{object_id}` in "
+                f"collection `{cls.collection()}`"
+            )
+        return cls.from_url(document.get("channel_url"))
+
+    @classmethod
     def from_url(cls, url):
         """ Instantiates a YoutubeChannelHandler from a url.
         
         Args:
-            (url, str): A Youtube channel url
+            url (str): A Youtube channel url
         Returns:
-            (YoutubeChannelHandler): The handler.
+            YoutubeChannelHandler: The handler.
         """
         return cls(Channel(url))
 
@@ -120,8 +142,8 @@ class YoutubeVideoHandler(DocumentHandler):
         video = self.python_object
         srt = download_captions(video.watch_url)
         return {
-            "srt": self.convert_srt_text_into_document(srt),
-            "scriptures": self.convert_srt_text_into_scriptures(srt),
+            "srt": self.convert_srt_into_document(srt),
+            "scriptures": self.extract_scriptures_from_srt(srt),
         }
 
     @classmethod
@@ -171,6 +193,26 @@ class YoutubeVideoHandler(DocumentHandler):
         }
 
     @classmethod
+    def from_object_id(cls, object_id):
+        """ Instantiates a YoutubeChannelHandler from a database object id. 
+
+        Args:
+            object_id (bson.ObjectId): A database object id.
+        Returns:
+            YoutubeChannelHandler: The handler.
+        Raises:
+            ValueError: If the specified object_id does not exist in the
+                database. 
+        """
+        document = cls.get_document_from_object_id(object_id)
+        if not document:
+            raise ValueError(
+                f"Could not find a document with id `{object_id}` in "
+                f"collection `{cls.collection()}`"
+            )
+        return cls.from_url(document.get("url"))
+
+    @classmethod
     def from_url(cls, url):
         """ Instantiates a YoutubeVideoHandler from a url.
         
@@ -182,17 +224,19 @@ class YoutubeVideoHandler(DocumentHandler):
         return cls(YouTube(url))
 
     @staticmethod
-    def convert_srt_text_into_document(text):
-        """ Converts raw srt text (as from a srt file) into a JSON document
-            representation.
+    def decompose_srt(srt):
+        """ Given text in raw srt format, decomposes the file into its frames,
+            timcodes and captions.
 
         Args:
-            text (str): Raw text from an srt file
+            srt (str): Raw srt text
         Returns:
-            List[dict]: Srt data encoded into a JSON representation. 
+            Tuple(List[int], List[Tuple[str]], List[str]): A tuple of:
+                - Frames (int)
+                - Timecodes (tuple of (start, end) times)
+                - Captions (str)
         """
-        output = []
-        lines = text.split("\n")
+        lines = srt.split("\n")
         frames = lines[::4]
         timecodes = lines[1::4]
         captions = lines[2::4]
@@ -200,20 +244,40 @@ class YoutubeVideoHandler(DocumentHandler):
         # Asserts that every third line is an empty string
         # This indicates a split between this caption and the next!
         assert not any(spaces), "Unsupported srt structure provided!"
+        # Do some processing to extract the start and end timecodes
+        times = [t.split("-->") for t in timecodes]
+        return (
+            frames,
+            [(start.strip(), end.strip()) for start, end in times],
+            captions,
+        )
+
+    @staticmethod
+    def convert_srt_into_document(srt):
+        """ Converts raw srt text (as from a srt file) into a JSON document
+            representation.
+
+        Args:
+            srt (str): Raw text from an srt file
+        Returns:
+            List[dict]: Srt data encoded into a JSON representation. 
+        """
+        output = []
+        frames, timecodes, captions = YoutubeVideoHandler.decompose_srt(srt)
         for frame, times, caption in zip(frames, timecodes, captions):
-            start, end = times.split("-->")
+            start, end = times
             output.append({
                 "caption": caption,
                 "frame": int(frame),
                 "timecodes": {
-                    "start": start.strip(),
-                    "end": end.strip(),
+                    "start": start,
+                    "end": end,
                 }
             })
         return output
 
     @staticmethod
-    def convert_srt_text_into_scriptures(text, allow_duplicates=False):
+    def extract_scriptures_from_srt(srt, allow_duplicates=False):
         """ Converts raw srt text (as from a srt file) into scripture
             references.
 
@@ -222,13 +286,15 @@ class YoutubeVideoHandler(DocumentHandler):
             (‘Book name’, start chapter, start verse, end chapter, end verse)
 
         Args:
-            text (str): Raw text from an srt file
+            srt (str): Raw text from an srt file
             allow_duplicates (bool): If true, no duplicate entries will be
                 returned.
         Returns:
             List[scriptures.ScriptureReference]: Collection of extracted
                 scripture references. 
         """
+        _, _, captions = YoutubeVideoHandler.decompose_srt(srt)
+        text = " ".join(captions)
         bible = Bible()
         references = [
             bible.reference_to_string(*ref) for ref in bible.extract(text)

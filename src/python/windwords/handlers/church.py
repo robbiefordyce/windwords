@@ -199,6 +199,26 @@ class ChurchHandler(DocumentHandler):
         return cls.resolve_denomination_from_text(text)
 
     @classmethod
+    def from_object_id(cls, object_id):
+        """ Instantiates a ChurchHandler from a database object id. 
+
+        Args:
+            object_id (bson.ObjectId): A database object id.
+        Returns:
+            ChurchHandler: The handler.
+        Raises:
+            ValueError: If the specified object_id does not exist in the
+                database. 
+        """
+        document = cls.get_document_from_object_id(object_id)
+        if not document:
+            raise ValueError(
+                f"Could not find a document with id `{object_id}` in "
+                f"collection `{cls.collection()}`"
+            )
+        return cls.from_google_place_id(document.get("gpid"))
+
+    @classmethod
     def from_google_place_id(cls, gpid):
         """ Instantiates a ChurchHandler from a Google Place Id.
         
