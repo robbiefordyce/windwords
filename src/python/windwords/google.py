@@ -44,6 +44,37 @@ def get_place(place_id):
     return get_client().place(place_id)
 
 
+def get_places_by_query(query, query_type="textquery"):
+    """ Yields Google Place results from the given text input query.
+        
+    Args:
+        query (str): The text input specifying which place to search for (for
+            example, a name, address, or phone number).
+        query_type (str): The type of input. This can be one of either
+            'textquery' or 'phonenumber'. Defaults to 'textquery'.
+    Yields:
+        dict: Serialized Google Place data matching the query.
+    """
+    for result in get_place_ids_by_query(query, query_type=query_type):
+        yield get_place(result)
+
+
+@cached(cache={})
+def get_place_ids_by_query(query, query_type="textquery"):
+    """ Returns Google Place IDs from the given text input query.
+        
+    Args:
+        query (str): The text input specifying which place to search for (for
+            example, a name, address, or phone number).
+        query_type (str): The type of input. This can be one of either
+            'textquery' or 'phonenumber'. Defaults to 'textquery'.
+    Returns:
+        List[str]: Serialized Google Place ids matching the query.
+    """
+    results = get_client().find_place(query, query_type).get("candidates", [])
+    return [r.get("place_id") for r in results if r.get("place_id")]
+
+
 @cached(cache={})
 def get_places_by_type(
         place_type,
