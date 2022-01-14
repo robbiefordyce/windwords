@@ -142,6 +142,22 @@ class DocumentHandler(ABC):
         ids = document.get("link", {}).get(field, [])
         return ids if isinstance(ids, list) else [ids]
 
+    def delete(self):
+        """ Removes the document from the database.
+
+        Returns:
+            bool: True if the document was successfully removed.
+        Raises:
+            AssertionError: If the document does not exist in the database.
+        """
+        assert self.exists_in_database(), (
+            f"Document `{self.database_object_id} `does not exist in database!"
+        )
+        # TODO implement auto unlinking
+        return mongo.delete_document_by_id(
+            self.collection(), self.database_object_id()
+        )
+
     @abstractmethod
     def primary_data(self):
         """ Resolves the primary fields and values.

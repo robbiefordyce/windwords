@@ -302,4 +302,3 @@ class YoutubeVideoHandler(DocumentHandler):
         if not allow_duplicates:
             references = list(set(references))
         return sorted(references)
-

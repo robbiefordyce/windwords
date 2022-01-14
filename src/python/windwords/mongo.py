@@ -277,3 +277,35 @@ def update_document_by_id(collection, objectID, modification, operator="$set"):
         modification,
         operator=operator,
     )
+
+
+def __delete_document(collection, query):
+    """ Removes the specified document (matching the query) from the collection
+        if it exists.
+
+        This method is private due to the inherent danger involved in its usage
+        - we should only ever be deleting documents by bson.ObjectId via:
+        `delete_document_by_id`
+
+    Args:
+        collection (str): The collection name to update within.
+        query (dict): A description of the document to be deleted.
+    Returns:
+        bool: True if the document was successfully removed.
+    """
+    collection = get_collection(collection)
+    result = collection.delete_one(query)
+    return bool(result.deleted_count)
+
+
+def delete_document_by_id(collection, objectID):
+    """ Removes the specified document (matching the objectID) from the
+        collection if it exists.
+
+    Args:
+        collection (str): The collection name to update within.
+        objectID (bson.ObjectId): The database object identifier.
+    Returns:
+        bool: True if the document was successfully removed.
+    """
+    return __delete_document(collection, {"_id": bson.ObjectId(objectID)})
