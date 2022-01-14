@@ -228,21 +228,13 @@ class ChurchHandler(DocumentHandler):
             ChurchHandler: The handler.
         Raises:
             ValueError:
-                If a corresponding Google Place could not be resolved, or
-                If the corresponding Google Place is not recognised as a church
+                If a corresponding Google Place could not be resolved
         """
         # Resolve the place
         place = google.get_place(gpid) or {}
         result = place.get("result", {})
         if not result:
             raise ValueError(f"Could not resolve a Google Place for `{gpid}`")
-        # Assert that the place is listed as a church or place of worship!
-        types = result.get("types", [])
-        if not any([t in types for t in ("church", "place_of_worship")]):
-            raise ValueError(
-                f"Cannot accept `{gpid}`: "
-                "Place is not a church or a place of worship"
-            )
         location = result.get("geometry", {}).get("location", {}) 
         address_components = result.get("address_components", [])
         # Utility to extract the address component from the JSON data
