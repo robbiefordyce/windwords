@@ -104,8 +104,8 @@ def xml_caption_to_srt(self, xml_captions: str) -> str:
         sequence_number = i + 1  # convert from 0-indexed to 1.
         line = "{seq}\n{start} --> {end}\n{text}\n".format(
             seq=sequence_number,
-            start=self.float_to_srt_time_format(start),
-            end=self.float_to_srt_time_format(end),
+            start=self.float_to_srt_time_format(start/1000.),
+            end=self.float_to_srt_time_format(end/1000.),
             text=caption,
         )
         segments.append(line)
