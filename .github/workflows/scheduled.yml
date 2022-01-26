@@ -5,6 +5,7 @@ on:
   schedule:
     # Runs "At 22:00 on Tuesday" (see https://crontab.guru)
     - cron: '0 22 * * TUE'
+  workflow_dispatch:
 
 jobs:
   populate:
