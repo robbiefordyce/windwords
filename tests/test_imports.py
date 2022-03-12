@@ -10,5 +10,5 @@ def test_import_windwords():
     from windwords import logging
     from windwords import mongo
     from windwords import scripture
-    from windwords import words
+    from windwords import resource
     from windwords import youtube
